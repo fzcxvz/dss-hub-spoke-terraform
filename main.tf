@@ -1,10 +1,10 @@
 
 # Resource Group Module is Used to Create Resource Groups
-module "hub-resourcegroup" {
+module "rg-connectivity-hub" {
 source = "./modules/resourcegroups"
 # Resource Group Variables
-az_rg_name      = "az-conn-pr-uaen-net-rg"
-az_rg_location  = "uaenorth"
+az_rg_name      = "connectivity-hub"
+az_rg_location  = "eu-west"
 az_tags = {
 ApplicationName = "Network"
 Role 		    = "Network"
@@ -18,11 +18,11 @@ Sovereignty     = "Confidential"
 }
 
 # Resource Group Module is Used to Create Resource Groups
-module "spoke1-resourcegroup" {
+module "rg-management-hub" {
 source = "./modules/resourcegroups"
 # Resource Group Variables
-az_rg_name     = "az-netb-pr-uaen-rg"
-az_rg_location = "uaenorth"
+az_rg_name     = "management-hub"
+az_rg_location = "eu-west"
 az_tags = {
 ApplicationName = "Network"
 Role 		    = "Network"
@@ -36,11 +36,11 @@ Sovereignty     = "Confidential"
 }
 
 # Resource Group Module is Used to Create Resource Groups
-module "mgmt-resourcegroup" {
+module "rg-geomatics-ota" {
 source = "./modules/resourcegroups"
 # Resource Group Variables
-az_rg_name     = "az-mgmt-pr-uaen-bkp-rg"
-az_rg_location = "uaenorth"
+az_rg_name     = "geomatics-ota"
+az_rg_location = "eu-west"
 az_tags = {
 ApplicationName = "Network"
 Role 		    = "Network"
@@ -54,11 +54,11 @@ Sovereignty     = "Confidential"
 }
 
 # Resource Group Module is Used to Create Resource Groups
-module "mgmt-resourcegroup_01" {
+module "rg-geomatics-prod" {
 source = "./modules/resourcegroups"
 # Resource Group Variables
-az_rg_name     = "az-mgmt-pr-uaen-rg"
-az_rg_location = "uaenorth"
+az_rg_name     = "geomatics-prod"
+az_rg_location = "eu-west"
 az_tags = {
 ApplicationName = "Network"
 Role 		    = "Network"
@@ -72,18 +72,18 @@ Sovereignty     = "Confidential"
 }
 
 # vnet Module is used to create Virtual Networks and Subnets
-module "hub-vnet" {
+module "vnet-connectivity-hub" {
 source = "./modules/vnet"
 
-virtual_network_name              = "az-conn-pr-uaen-vnet"
-resource_group_name               = module.hub-resourcegroup.rg_name
-location                          = module.hub-resourcegroup.rg_location
-virtual_network_address_space     = ["10.50.0.0/16"]
+virtual_network_name              = "vnet-connectivity-hub"
+resource_group_name               = module.rg-connectivity-hub.rg_name
+location                          = module.rg-connectivity-hub.rg_location
+virtual_network_address_space     = ["10.100.0.0/16"]
 tags = {
   Sovereignty = "Confidential"
 }
 # Subnets are used in Index for other modules to refer
-# module.hub-vnet.vnet_subnet_id[0] = ApplicationGatewaySubnet   - Alphabetical Order
+# module.vnet-connectivity-hub.vnet_subnet_id[0] = ApplicationGatewaySubnet   - Alphabetical Order
 # module.hub-vnet.vnet_subnet_id[1] = AzureBastionSubnet         - Alphabetical Order
 # module.hub-vnet.vnet_subnet_id[2] = AzureFirewallSubnet        - Alphabetical Order
 # module.hub-vnet.vnet_subnet_id[3] = GatewaySubnet              - Alphabetical Order
@@ -92,31 +92,19 @@ tags = {
 subnet_names = {
     "GatewaySubnet" = {
         subnet_name = "GatewaySubnet"
-        address_prefixes = ["10.50.1.0/24"]
+        address_prefixes = ["10.100.2.0/24"]
         route_table_name = ""
         snet_delegation  = ""
     },
-    "AzureFirewallSubnet" = {
-        subnet_name = "AzureFirewallSubnet"
-        address_prefixes = ["10.50.2.0/24"]
+    "snet-management" = {
+        subnet_name = "snet-management"
+        address_prefixes = ["10.100.1.0/24"]
         route_table_name = ""
         snet_delegation  = ""
     },
-    "ApplicationGatewaySubnet" = {
-        subnet_name = "ApplicationGatewaySubnet"
-        address_prefixes = ["10.50.3.0/24"]
-        route_table_name = ""
-        snet_delegation  = ""
-       }
-    "AzureBastionSubnet" = {
-        subnet_name = "AzureBastionSubnet"
-        address_prefixes = ["10.50.4.0/24"]
-        route_table_name = ""
-        snet_delegation  = ""
-       }
-    "JumpboxSubnet" = {
-        subnet_name = "JumpboxSubnet"
-        address_prefixes = ["10.50.5.0/24"]
+    "snet-ztna" = {
+        subnet_name = "snet-ztna"
+        address_prefixes = ["10.100.3.0/24"]
         route_table_name = ""
         snet_delegation  = ""
        }
@@ -124,24 +112,24 @@ subnet_names = {
 }
 
 # vnet Module is used to create Virtual Networks and Subnets
-module "spoke1-vnet" {
+module "vnet-management-hub" {
 source = "./modules/vnet"
 
-virtual_network_name              = "az-netb-pr-uaen-vnet"
-resource_group_name               = module.spoke1-resourcegroup.rg_name
-location                          = module.spoke1-resourcegroup.rg_location
-virtual_network_address_space     = ["10.51.0.0/16"]
+virtual_network_name              = "vnet-management-hub"
+resource_group_name               = module.rg-management-hub.rg_name
+location                          = module.rg-management-hub.rg_location
+virtual_network_address_space     = ["10.200.0.0/16"]
 tags = {
   Sovereignty = "Confidential"
 }
 subnet_names = {
-    "az-netb-pr-web-snet" = {
-        subnet_name = "az-netb-pr-web-snet"
-        address_prefixes = ["10.51.1.0/24"]
+    "snet-recovery-service-vault" = {
+        subnet_name = "snet-recovery-service-vault"
+        address_prefixes = ["10.200.1.0/24"]
         route_table_name = ""
         snet_delegation  = ""
     },
-    "az-netb-pr-db-snet" = {
+    "snet-keyvault" = {
         subnet_name = "az-netb-pr-db-snet"
         address_prefixes = ["10.51.2.0/24"]
         route_table_name = ""
