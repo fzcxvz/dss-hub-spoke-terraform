@@ -7,7 +7,7 @@ terraform {
 **/
 provider "azurerm" {
   resource_provider_registrations = "none"
-  subscription_id = "808c0b1c-e71d-4e23-8a94-033b4b3edced"
+  subscription_id = "xxx"  #tochange > make private
 /*  
     tenant_id       = "xxxxx"
     client_id       = "xxxxx"
@@ -22,9 +22,4 @@ provider "azurerm" {
 
 
 }
-# if you dont want aws provider to be installed comment the below section
-
-  provider "aws" {
-  region = "us-east-1"
-  }
 
